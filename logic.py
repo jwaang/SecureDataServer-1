@@ -12,6 +12,9 @@ accounts = set()
 # Global Variables
 dataDict = {}
 
+# Output
+output = []
+
 ####################################
 
 class Principal:
@@ -22,7 +25,7 @@ class Principal:
         ### CREATE PRINCIPAL ###
         if name in accounts:
             res = {"status": "FAILED"}
-            print(res)
+            output.append(res)
             return
         self.setName(name)
         hash = pbkdf2_sha256.hash(password)
@@ -32,7 +35,7 @@ class Principal:
         self.context.set_roles_loader(tmprole)
         accounts.add(name)
         res = {"status": "CREATE_PRINCIPAL"}
-        print(res)
+        output.append(res)
 
     def setName(self, name):
         self._name = name
@@ -44,13 +47,13 @@ class Principal:
         ### CHANGE PASSWORD ###
         if user is not "admin" or user is not self._name or self._name is not accounts:
             res = {"status": "FAILED"}
-            print(res)
+            output.append(res)
             return
         else:
             hash = pbkdf2_sha256.hash(password)
             self._password = hash
             res = {"status": "CHANGE_PASSWORD"}
-            print(res)
+            output.append(res)
 
     def getPassword(self):
         return self._password
@@ -70,13 +73,13 @@ class Principal:
             self.updatePermissions(self.getName(), var)
             self.updatePermissions("admin", var)
             res = {"status": "SET"}
-            print(res)
+            output.append(res)
         elif self.r.is_allowed(self.getName(), "write", var):
             res = {"status": "SET"}
-            print(res)
+            output.append(res)
         elif not self.r.is_allowed(self.getName(), "write", var):
             res = {"status": "FAILED"}
-            print(res)
+            output.append(res)
 
     def getData(self, var):
         if self.r.is_allowed(self.getName(), "read", var):
@@ -86,23 +89,23 @@ class Principal:
                 return self.localVars.get(var).varValue
         else:
             res = {"status": "FAILED"}
-            print(res)
+            output.append(res)
 
 
     def checkPermission(self, principal, action, resource):
         if self.r.is_allowed(principal, action, resource):
             res = {"status":"SUCCESS"}
-            print(res)
+            output.append(res)
         else:
             res = {"status":"DENIED"}
-            print(res)
+            output.append(res)
 
     def append(self, var, d):
         ### APPEND TO ###
         if self.r.is_allowed(self.getName(), "append", var) or self.r.is_allowed(self.getName(), "write", var):
             if var not in dataDict:
                 res = {"status": "FAILED"}
-                print(res)
+                output.append(res)
                 return
             if type(d) is str:
                 if var in dataDict:
@@ -119,16 +122,16 @@ class Principal:
                 dataDict.update({var:tmp})
                 self.r.add_resource(var)
             res = {"status":"APPEND"}
-            print(res)
+            output.append(res)
         else:
             res = {"status": "DENIED"}
-            print(res)
+            output.append(res)
 
     def local(self, var, d):
         ### LOCAL ###
         if var in dataDict or var in self.localVars:
             res = {"status": "FAILED"}
-            print(res)
+            output.append(res)
             return
         if d in dataDict:
             t = dataDict.get(d).varValue
@@ -144,18 +147,18 @@ class Principal:
             self.updatePermissions(self.getName(), var)
             self.updatePermissions("admin", var)
         res = {"status":"LOCAL"}
-        print(res)
+        output.append(res)
 
     def forEach(self, iterator, sequence, expression):
         ### FOREACH ###
         if self.r.is_allowed(self.getName(), "append", sequence) or self.r.is_allowed(self.getName(), "write", sequence):
             if not (sequence not in self.localVars or sequence not in dataDict):
                 res = {"status": "FAILED"}
-                print(res)
+                output.append(res)
                 return
             elif iterator in dataDict or iterator in self.localVars:
                 res = {"status": "FAILED"}
-                print(res)
+                output.append(res)
                 return
 
             if '.' in expression:
@@ -187,16 +190,16 @@ class Principal:
                     print({sequence: tmp.varValue})
                     self.r.add_resource(sequence)
             res = {"status":"FOREACH"}
-            print(res)
+            output.append(res)
         else:
             res = {"status": "DENIED"}
-            print(res)
+            output.append(res)
 
     def setRights(self, principal, action, resource):
         ### SET DELEGATION ###
         if principal not in accounts:
             res = {"status": "FAILED"}
-            print(res)
+            output.append(res)
             return
         if resource == "all":
             for name in dataDict:
@@ -205,17 +208,17 @@ class Principal:
         else:
             self.r.allow(principal, action, resource)
         res = {"status": "SET_DELEGATION"}
-        print(res)
+        output.append(res)
 
     def deleteRights(self, principal, action, resource):
         ### DELETE DELEGATION ###
         if principal not in accounts:
             res = {"status": "FAILED"}
-            print(res)
+            output.append(res)
             return
         if self._name is not "admin":
             res = {"status": "DENIED"}
-            print(res)
+            output.append(res)
             return
         if principal == "all":
             for name in accounts:
@@ -223,20 +226,20 @@ class Principal:
         else:
             self.r.deny(principal, action, resource)
         res = {"status": "DELETE_DELEGATION"}
-        print(res)
+        output.append(res)
 
     def defaultRights(self, principal):
         ### DEFAULT DELEGATION ###
         if principal not in accounts:
             res = {"status": "FAILED"}
-            print(res)
+            output.append(res)
             return
         if self._name is not "admin":
             res = {"status": "DENIED"}
-            print(res)
+            output.append(res)
             return
         res = {"status": "DEFAULT_DELEGATOR"}
-        print(res)
+        output.append(res)
 
     def cmd_return(self, expr):
         ### RETURN ###
@@ -248,19 +251,19 @@ class Principal:
         else:
             val = self.getData(expr)
         res = {"status":"RETURNING", "output":val}
-        print(res)
+        output.append(res)
 
     def cmd_exit(self):
         ### EXIT ###
         if self._name == 'admin':
             res = {"status":"EXITING"}
-            print(res)
+            output.append(res)
             exit(0)
             # Terminate the client connection
             # Halts with return code 0
         else:
             res = {"status": "DENIED"}
-            print(res)
+            output.append(res)
 
 ####################################
 
@@ -278,7 +281,7 @@ class Variable:
 def verifyPass(principal, password):
     if pbkdf2_sha256.verify(password, principal.getPassword()):
         res = {"status":"SUCCESS"}
-        print(res)
+        output.append(res)
     else:
         res = {"stats":"DENIED"}
-        print(res)
+        output.append(res)

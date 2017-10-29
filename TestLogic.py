@@ -5,6 +5,7 @@ from logic import verifyPass
 from logic import accounts
 from logic import isAdmin
 from logic import adminPass
+from logic import output
 
 def main():
     '''
@@ -185,13 +186,16 @@ def main():
     alice = Principal("alice", "123")
 
     dict = {"name":"mike", "date":"1-1-90"}
-    admin.setData("test", dict)
+    admin.setData("test", [])
 
     #admin.setData("test", "{name: mike, date: 1-1-90}")
     #admin.setData("x", "Alice can Read")
     #admin.setData("y", "Bob can Write")
 
-    print(admin.getData("test").get("name"))
+    #print(admin.getData("test"))
+
+    print(output)
+
     '''
     print("\nAlice can now read all")
     admin.setRights("alice", "read", "all")
