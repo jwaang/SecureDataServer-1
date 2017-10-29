@@ -183,6 +183,9 @@ def main():
 
 
     admin = Principal("admin", adminPass)
+
+    verifyPass(admin, "123")
+
     alice = Principal("alice", "123")
 
     dict = {"name":"mike", "date":"1-1-90"}

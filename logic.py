@@ -7,7 +7,7 @@ isAdmin = False
 adminPass = "pass" # ./server [PASSWORD]
 
 # Accounts
-accounts = set()
+accounts = {}
 
 # Global Variables
 dataDict = {}
@@ -33,7 +33,7 @@ class Principal:
         self.localVars = {}
         tmprole = self.r.add_role(name)
         self.context.set_roles_loader(tmprole)
-        accounts.add(name)
+        accounts.update({name: self})
         res = {"status": "CREATE_PRINCIPAL"}
         output.append(res)
 
@@ -282,6 +282,8 @@ def verifyPass(principal, password):
     if pbkdf2_sha256.verify(password, principal.getPassword()):
         res = {"status":"SUCCESS"}
         output.append(res)
+        return True
     else:
         res = {"stats":"DENIED"}
         output.append(res)
+        return False
