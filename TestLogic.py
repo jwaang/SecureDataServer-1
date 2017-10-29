@@ -7,7 +7,7 @@ from logic import isAdmin
 from logic import adminPass
 
 def main():
-
+    '''
     print("Create Admin account")
     print("Add account to accounts set. Set isAdmin to True")
     print("-----")
@@ -115,7 +115,7 @@ def main():
     admin.cmd_return("records")
     pOne.cmd_exit()
     admin.cmd_exit()
-
+    '''
 
     '''
     admin = Principal("admin", adminPass)
@@ -178,6 +178,31 @@ def main():
     carl.append("x", "CONCATENATE")
     print("\nAlice attempts tp Append | DENIED")
     alice.append("x", "************")
+    '''
+
+
+    admin = Principal("admin", adminPass)
+    alice = Principal("alice", "123")
+
+    dict = {"name":"mike", "date":"1-1-90"}
+    admin.setData("test", dict)
+
+    #admin.setData("test", "{name: mike, date: 1-1-90}")
+    #admin.setData("x", "Alice can Read")
+    #admin.setData("y", "Bob can Write")
+
+    print(admin.getData("test").get("name"))
+    '''
+    print("\nAlice can now read all")
+    admin.setRights("alice", "read", "all")
+
+    print("\nTesting Append, Local, and ForEach")
+    admin.setData("records", [])
+    admin.append("records", {"name":"mike", "date":"1-1-90"})
+    admin.append("records", {"name":"dave", "date":"1-1-85"})
+    admin.local("names", "records")
+    admin.forEach("rec", "names", "rec.name")
+    admin.forEach("rec", "names", "x")
     '''
 
 if __name__ == "__main__":

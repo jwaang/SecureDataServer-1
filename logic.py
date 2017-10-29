@@ -61,7 +61,6 @@ class Principal:
         self.r.allow(user, "append", var)
         self.r.allow(user, "delegate", var)
 
-
     def setData(self, var, d):
         ### SET ###
         if var not in dataDict:
@@ -158,19 +157,35 @@ class Principal:
                 res = {"status": "FAILED"}
                 print(res)
                 return
-            seq = self.getData(sequence)
-            expr = expression.split(".")
-            if expr[0] == iterator:
-                for i,s in enumerate(seq):
-                    seq[i] = s.get(expr[1])
-            if sequence in dataDict:
-                tmp = Variable(seq)
-                dataDict.update({sequence: tmp})
-                self.r.add_resource(sequence)
+
+            if '.' in expression:
+                seq = self.getData(sequence)
+                expr = expression.split(".")
+                if expr[0] == iterator:
+                    for i,s in enumerate(seq):
+                        seq[i] = s.get(expr[1])
+                if sequence in dataDict:
+                    tmp = Variable(seq)
+                    dataDict.update({sequence: tmp})
+                    print({sequence: tmp.varValue})
+                    self.r.add_resource(sequence)
+                else:
+                    tmp = Variable(seq)
+                    self.localVars.update({sequence: tmp})
+                    print({sequence: tmp.varValue})
+                    self.r.add_resource(sequence)
             else:
-                tmp = Variable(seq)
-                self.localVars.update({sequence: tmp})
-                self.r.add_resource(sequence)
+                seq = self.getData(expression)
+                if sequence in dataDict:
+                    tmp = Variable(seq)
+                    dataDict.update({sequence: tmp})
+                    print({sequence: tmp.varValue})
+                    self.r.add_resource(sequence)
+                else:
+                    tmp = Variable(seq)
+                    self.localVars.update({sequence: tmp})
+                    print({sequence: tmp.varValue})
+                    self.r.add_resource(sequence)
             res = {"status":"FOREACH"}
             print(res)
         else:
@@ -179,13 +194,14 @@ class Principal:
 
     def setRights(self, principal, action, resource):
         ### SET DELEGATION ###
-        if principal == "all":
-            for name in accounts:
-                self.r.allow(name, action, resource)
-        elif principal not in accounts:
+        if principal not in accounts:
             res = {"status": "FAILED"}
             print(res)
             return
+        if resource == "all":
+            for name in dataDict:
+                print(name)
+                self.r.allow(principal, action, name)
         else:
             self.r.allow(principal, action, resource)
         res = {"status": "SET_DELEGATION"}
