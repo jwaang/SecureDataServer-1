@@ -1,6 +1,7 @@
 import rbac.acl
 import rbac.context
 from passlib.hash import pbkdf2_sha256
+import json
 
 # Admin
 isAdmin = False
@@ -115,12 +116,16 @@ class Principal:
                 tmp = Variable(v + d)
                 dataDict.update({var:tmp})
                 self.r.add_resource(var)
+                self.updatePermissions(self.getName(), var)
+                self.updatePermissions("admin", var)
             elif type(d) is dict:
                 t = list(dataDict.get(var).varValue)
                 t.append(d)
                 tmp = Variable(t)
                 dataDict.update({var:tmp})
                 self.r.add_resource(var)
+                self.updatePermissions(self.getName(), var)
+                self.updatePermissions("admin", var)
             res = {"status":"APPEND"}
             output.append(res)
         else:
@@ -172,11 +177,15 @@ class Principal:
                     dataDict.update({sequence: tmp})
                     print({sequence: tmp.varValue})
                     self.r.add_resource(sequence)
+                    self.updatePermissions(self.getName(), sequence)
+                    self.updatePermissions("admin", sequence)
                 else:
                     tmp = Variable(seq)
                     self.localVars.update({sequence: tmp})
                     print({sequence: tmp.varValue})
                     self.r.add_resource(sequence)
+                    self.updatePermissions(self.getName(), sequence)
+                    self.updatePermissions("admin", sequence)
             else:
                 seq = self.getData(expression)
                 if sequence in dataDict:
@@ -184,11 +193,15 @@ class Principal:
                     dataDict.update({sequence: tmp})
                     print({sequence: tmp.varValue})
                     self.r.add_resource(sequence)
+                    self.updatePermissions(self.getName(), sequence)
+                    self.updatePermissions("admin", sequence)
                 else:
                     tmp = Variable(seq)
                     self.localVars.update({sequence: tmp})
                     print({sequence: tmp.varValue})
                     self.r.add_resource(sequence)
+                    self.updatePermissions(self.getName(), sequence)
+                    self.updatePermissions("admin", sequence)
             res = {"status":"FOREACH"}
             output.append(res)
         else:
@@ -247,7 +260,10 @@ class Principal:
             val = expr
         elif '.' in expr:
             e = expr.split('.')
-            val = self.getData(expr[0]).get(e[1])
+            if type(self.getData(e[0])) is list:
+                val = self.getData(e[0])[0].get(e[1])
+            else:
+                val = self.getData(expr[0]).get(e[1])
         else:
             val = self.getData(expr)
         res = {"status":"RETURNING", "output":val}

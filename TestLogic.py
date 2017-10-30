@@ -181,36 +181,21 @@ def main():
     alice.append("x", "************")
     '''
 
-
-    admin = Principal("admin", adminPass)
-
-    verifyPass(admin, "123")
-
-    alice = Principal("alice", "123")
-
-    dict = {"name":"mike", "date":"1-1-90"}
-    admin.setData("test", [])
-
-    #admin.setData("test", "{name: mike, date: 1-1-90}")
-    #admin.setData("x", "Alice can Read")
-    #admin.setData("y", "Bob can Write")
-
-    #print(admin.getData("test"))
-
-    print(output)
-
     '''
-    print("\nAlice can now read all")
-    admin.setRights("alice", "read", "all")
-
+    admin = Principal("admin", adminPass)
     print("\nTesting Append, Local, and ForEach")
     admin.setData("records", [])
     admin.append("records", {"name":"mike", "date":"1-1-90"})
     admin.append("records", {"name":"dave", "date":"1-1-85"})
     admin.local("names", "records")
-    admin.forEach("rec", "names", "rec.name")
-    admin.forEach("rec", "names", "x")
+    #print(admin.getData("names"))
+    admin.cmd_return("names.name")
+    #admin.forEach("rec", "names", "rec.name")
     '''
+
+
+    print(output)
+
 
 if __name__ == "__main__":
     main()
